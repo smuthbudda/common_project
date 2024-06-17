@@ -32,6 +32,7 @@ function RunDockerCompose {
     Push-Location -Path $pathToAPI
     cargo run
     Pop-Location
+    Push-Location -Path $BasePath
 }
     
 function PauseForConformation {
@@ -49,18 +50,26 @@ $pathToCommon = "$BasePath\jojo_common"
 $pathToWeb = "$BasePath\sk_web"
             
 if ($PSBoundParameters.ContainsKey('RunApi')) {
+    Write-Output "Running API ------------------------------------------------------------------------------------------------------------------------------------------"
     RunAPI
+    Push-Location -Path $BasePath
 }
                 
 if ($PSBoundParameters.ContainsKey('RunWeb')) {
+    Write-Output "Running Web ------------------------------------------------------------------------------------------------------------------------------------------"
     RunWeb
+    Push-Location -Path $BasePath
 }
                     
 if ($PSBoundParameters.ContainsKey('LaunchDocker')) {
     RunDockerCompose       
+    Push-Location -Path $BasePath
 }
 else {   
+    #This is the default behavior. TODO: the run web is never called.
+    write-output "Running full stack"
     RunAPI
     RunWeb
-    Push-Location -Path $pathToCommon
+    # RunDockerCompose
+    Push-Location -Path $BasePath
 }
