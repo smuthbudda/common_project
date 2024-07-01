@@ -7,7 +7,7 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug common unit tests.",
+            "name": "Debug unit tests in library 'gen_data'",
             "cargo": {
                 "args": [
                     "test",
@@ -21,12 +21,12 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}/jojo_common/gen_data"
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug common exexutable",
+            "name": "Debug executable 'gen_data'",
             "cargo": {
                 "args": [
                     "build",
@@ -39,12 +39,12 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}/jojo_common/gen_data"
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug common execuatble tests.",
+            "name": "Debug unit tests in executable 'gen_data'",
             "cargo": {
                 "args": [
                     "test",
@@ -58,7 +58,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}/jojo_common/gen_data"
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
