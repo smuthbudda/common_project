@@ -6,7 +6,7 @@ use clap::Parser;
 
 
 fn main() {
-    scaffold::read_files()
+    scaffold::read_files("")
 }
 
 #[derive(Parser)]

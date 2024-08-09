@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 use std::fs;
 use std::{fs::File, io::Write};
-
 use crate::{
     gen_common::get_col_type,
     structs::{DataColumn, DataTable},
@@ -17,13 +16,13 @@ static ATTRIBUTE_FILE: &str = "Templates/attributes.txt";
 static STRUCT_TEMPLATE_FILE: &str = "Templates/struct_template.txt";
 static DB_MODELS_PATH: &str = "db_models";
 
-pub fn read_files() {
+pub fn read_files(_folder_path: &str) {
     println!("---- Reading SQL Schema from: {} ----", SQL_FILE);
 
     let contents = fs::read_to_string(SQL_FILE).expect("Error reading the SQL file.");
     println!("---- Reading file from database schema ----");
 
-    create_folder_if_not_exists(DB_MODELS_PATH);
+    create_folder_if_not_exists(DB_MODELS_PATH).expect("There was an error creating the folder for the database files.");
 
     let tables = read_db_init_file(&contents);
 
@@ -57,7 +56,7 @@ fn read_db_init_file(sql_file: &str) -> Vec<DataTable> {
         if table_name.to_string().is_empty() {
             continue;
         }
-
+        println!(" ");
         //-----Columns-----
         println!("-------- {} --------", table_name);
         let mut table_cols: Vec<&str> = table_as_string.trim().split(",").collect();
@@ -83,7 +82,7 @@ fn read_db_init_file(sql_file: &str) -> Vec<DataTable> {
         }
         tables.push(DataTable::new(table_name.to_owned(), columns))
     }
-
+    println!(" ");
     tables
 }
 
@@ -93,7 +92,7 @@ fn read_db_init_file(sql_file: &str) -> Vec<DataTable> {
 fn write_to_rust_file(sql_tables: &Vec<DataTable>) -> std::io::Result<()> {
 
     for table in sql_tables {
-        let file_path: String = DB_MODELS_PATH.to_owned() + &table.table_name + ".rs";
+        let file_path: String = DB_MODELS_PATH.to_owned() + "/" + &table.table_name + ".rs";
         let mut file = File::create_new(file_path)?;
         let struct_details = generate_struct_data(&table);
         file.write(struct_details.as_bytes())?;
@@ -101,13 +100,13 @@ fn write_to_rust_file(sql_tables: &Vec<DataTable>) -> std::io::Result<()> {
     Ok(())
 }
 
-///---------------------------------------------------------------------------------------------------------------
+///--------------------------------------------------------------------------------------------------------------
 /// Generates the struct data for the rust file.
 ///--------------------------------------------------------------------------------------------------------------
 fn generate_struct_data(table: &DataTable) -> String {
     let mut struct_data: String = "".to_string();
     struct_data.push_str(&format!(
-        "{}\\n
+        "{}\n
         pub struct {} {{\n
         }}",
         add_template_data(),
@@ -124,17 +123,22 @@ fn add_template_data() -> String {
 /// Generates the mod file for the rust file.
 /// --------------------------------------------------------------------------------------------------------------
 fn generate_mod_file(sql_tables: &Vec<DataTable>) -> std::io::Result<()> {
-    let mut file = File::create_new(DB_MODELS_PATH + "mod.rs")?;
+    let mut file = File::create_new(DB_MODELS_PATH.to_owned() + "/" + "mod.rs")?;
 
     for table in sql_tables {
-        file.write(format!("pub mod {};", table.table_name).as_bytes())?;
+        file.write(format!("pub mod {};\n", table.table_name).as_bytes())?;
     }
     Ok(())
 }
 
-
+///---------------------------------------------------------------------------------------------------------------
+/// Create the folder for the database models. If one already exists it will be removed and recreated.
+///---------------------------------------------------------------------------------------------------------------
 fn create_folder_if_not_exists(folder_path: &str) -> Result<(), std::io::Error> {
-    if !std::path::Path::new(folder_path).exists() {
+    if std::path::Path::new(folder_path).exists() {
+        std::fs::remove_dir_all(folder_path)?;//remove it 
+        std::fs::create_dir_all(folder_path)?;//create it again
+    }else{
         std::fs::create_dir_all(folder_path)?;
     }
     Ok(())
